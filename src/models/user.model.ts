@@ -8,15 +8,16 @@ interface UserAttributes {
   password: string;
   contact: string;
   address: string;
-  status: number;        
+  status: number;
   isVerified: boolean;
   otp?: string | null;
+  role: "admin" | "user"; // Only two roles
   createdAt?: Date;
   updatedAt?: Date;
 }
 
 interface UserCreationAttributes
-  extends Optional<UserAttributes, "id" | "isVerified" | "otp" | "createdAt" | "updatedAt"> {}
+  extends Optional<UserAttributes, "id" | "isVerified" | "otp" | "createdAt" | "updatedAt" | "role"> {}
 
 export class User extends Model<UserAttributes, UserCreationAttributes>
   implements UserAttributes
@@ -30,6 +31,7 @@ export class User extends Model<UserAttributes, UserCreationAttributes>
   declare status: number;
   declare isVerified: boolean;
   declare otp: string | null;
+  declare role: "admin" | "user";
   declare readonly createdAt: Date;
   declare readonly updatedAt: Date;
 }
@@ -68,7 +70,7 @@ User.init(
     status: {
       type: DataTypes.INTEGER,
       allowNull: false,
-      defaultValue: 1, // 1 = active, 0 = inactive
+      defaultValue: 1,
     },
     isVerified: {
       type: DataTypes.BOOLEAN,
@@ -78,6 +80,11 @@ User.init(
     otp: {
       type: DataTypes.STRING,
       allowNull: true,
+    },
+    role: {
+      type: DataTypes.ENUM("admin", "user"),
+      allowNull: false,
+      defaultValue: "user",
     },
   },
   {

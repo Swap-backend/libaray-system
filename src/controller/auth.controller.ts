@@ -1,3 +1,4 @@
+// controllers/auth.controller.ts
 import type { Request, Response } from "express";
 import bcrypt from "bcrypt";
 import jwt from "jsonwebtoken";
@@ -17,35 +18,38 @@ const generateAccessToken = (user: any) => {
       email: user.email,
       contact: user.contact,
       status: user.status,
+      role: user.role,
     },
     jwtSecret,
     { expiresIn: "1h" }
   );
 };
 
-
 export const register = async (req: Request, res: Response) => {
-  const { userName, email, password, contact, address } = req.body;
+  const { userName, email, password, contact, address, role } = req.body;
 
   if (!userName || !email || !password || !contact || !address) {
     return res.status(400).json({ success: false, message: "All required fields must be provided" });
   }
 
+  // Optional: Validate role, only allow "admin" or "user"
+  const validRoles = ["admin", "user"];
+  if (role && !validRoles.includes(role)) {
+    return res.status(400).json({ success: false, message: "Invalid role provided" });
+  }
+
   try {
-    const existingUserEmail = await User.findOne({ where: { email } });
-    if (existingUserEmail) {
+    if (await User.findOne({ where: { email } })) {
       return res.status(400).json({ success: false, message: "Email already registered" });
     }
-
-    const existingUserContact = await User.findOne({ where: { contact } });
-    if (existingUserContact) {
+    if (await User.findOne({ where: { contact } })) {
       return res.status(400).json({ success: false, message: "Contact already registered" });
     }
 
     const hashedPassword = await bcrypt.hash(password, 10);
     const otp = Math.floor(100000 + Math.random() * 900000).toString();
 
-    const user = await User.create({
+    const newUser = await User.create({
       userName,
       email,
       password: hashedPassword,
@@ -53,30 +57,28 @@ export const register = async (req: Request, res: Response) => {
       address,
       status: 1,
       otp,
+      role: role || "user",  // <-- Use role from request or default to "user"
     });
-
 
     return res.status(201).json({
       success: true,
-      message: "User registered successfully. OTP has been generated.",
+      message: "User registered successfully. OTP generated.",
       data: {
-        userId: user.id,
-        email: user.email,
-        contact: user.contact,
-        otp, 
+        id: newUser.id,
+        email: newUser.email,
+        contact: newUser.contact,
+        otp,
+        role: newUser.role,
       },
     });
   } catch (err) {
-    return res.status(500).json({ success: false, message: (err as Error).message });
+    return res.status(500).json({ success: false, message: "Internal server error", error: (err as Error).message });
   }
 };
 
 
-
-
 export const verifyOtp = async (req: Request, res: Response) => {
   const { contact, otp } = req.body;
-
   if (!contact || !otp) {
     return res.status(400).json({ success: false, message: "Contact and OTP required" });
   }
@@ -92,7 +94,7 @@ export const verifyOtp = async (req: Request, res: Response) => {
     }
 
     user.isVerified = true;
-    user.otp = null; // clear OTP after success
+    user.otp = null;
     await user.save();
 
     const token = generateAccessToken(user);
@@ -107,6 +109,7 @@ export const verifyOtp = async (req: Request, res: Response) => {
         email: user.email,
         contact: user.contact,
         isVerified: user.isVerified,
+        role: user.role,
       },
     });
   } catch (err) {
@@ -114,10 +117,8 @@ export const verifyOtp = async (req: Request, res: Response) => {
   }
 };
 
-
 export const login = async (req: Request, res: Response) => {
   const { contact, password } = req.body;
-
   if (!contact || !password) {
     return res.status(400).json({ success: false, message: "Contact and password required" });
   }
@@ -127,7 +128,6 @@ export const login = async (req: Request, res: Response) => {
     if (!user) {
       return res.status(404).json({ success: false, message: "User not found" });
     }
-
     if (!user.isVerified) {
       return res.status(403).json({ success: false, message: "Please verify OTP before login" });
     }
@@ -139,7 +139,6 @@ export const login = async (req: Request, res: Response) => {
 
     const token = generateAccessToken(user);
 
-
     return res.status(200).json({
       success: true,
       message: "Login successful",
@@ -150,6 +149,7 @@ export const login = async (req: Request, res: Response) => {
         email: user.email,
         contact: user.contact,
         isVerified: user.isVerified,
+        role: user.role,
       },
     });
   } catch (err) {

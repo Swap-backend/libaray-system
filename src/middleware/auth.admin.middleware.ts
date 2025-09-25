@@ -7,15 +7,14 @@ dotenv.config();
 export const authenticate = (req: Request, res: Response, next: NextFunction) => {
   const authHeader = req.headers["authorization"];
 
-  // Token can be in format: "Bearer <token>", so let's extract token properly
-  // const token = authHeader && authHeader.startsWith("Bearer ") ? authHeader.split(" ")[1] : authHeader;
+
   const token = req.headers["authorization"];
 
   if (!token) return res.status(401).json({ message: "Unauthorized: Token missing" });
 
   const jwtSecret = process.env.JWT_SECRET;
   if (!jwtSecret) {
-    // If JWT_SECRET not set, this is a server config error
+
     console.error("JWT_SECRET environment variable not set");
     return res.status(500).json({ message: "Internal server error" });
   }
