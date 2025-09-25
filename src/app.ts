@@ -5,6 +5,9 @@ import { logRequests } from "./middleware/logger.js";
 import authRoutes from "./routes/auth.routes.js";
 import userRoutes from "./routes/user.routes.js";
 import bookRoutes from "./routes/books.routes.js";
+import transactionRoutes from "./routes/transactions.routes.js";
+import fineRoutes from "./routes/fines.routes.js";
+import reportRoutes from "./routes/reports.routes.js";
 import cors from "cors";
 
 dotenv.config();
@@ -25,6 +28,10 @@ app.use(logRequests);
 app.use("/api/auth", authRoutes);
 app.use("/api/users", userRoutes);
 app.use("/api/books", bookRoutes);
+app.use("/api/transactions", transactionRoutes);
+app.use("/api/fines", fineRoutes);
+app.use("/api/reports", reportRoutes); 
+app.use
 
 app.get("/", (req, res) => res.send("Library System API is running"));
 

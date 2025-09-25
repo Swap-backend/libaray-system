@@ -6,10 +6,10 @@ dotenv.config();
 
 export const authenticate = (req: Request, res: Response, next: NextFunction) => {
   const authHeader = req.headers["authorization"];
-  console.log(authHeader, "auth");
-
-
-  const token = req.headers["authorization"];
+  const headerValue = Array.isArray(authHeader) ? authHeader[0] : authHeader;
+  const token = typeof headerValue === "string" && headerValue.startsWith("Bearer ")
+    ? headerValue.slice(7)
+    : headerValue;
 
   if (!token) return res.status(401).json({ message: "Unauthorized: Token missing" });
 

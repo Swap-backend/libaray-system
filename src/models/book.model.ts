@@ -1,6 +1,6 @@
-import { Sequelize, DataTypes, Model } from "sequelize";
+import { Sequelize, DataTypes, Model, type ModelStatic } from "sequelize";
 
-const BookModel = (sequelize: Sequelize): typeof Model => {
+const BookModel = (sequelize: Sequelize): ModelStatic<Model> => {
   const Books = sequelize.define<Model>(
     "Books",
     {
