@@ -11,7 +11,7 @@ interface UserAttributes {
   status: number;
   isVerified: boolean;
   otp?: string | null;
-  role: "admin" | "user"; // Only two roles
+  role: "admin" | "user";
   createdAt?: Date;
   updatedAt?: Date;
 }

@@ -1,4 +1,3 @@
-import { Sequelize } from "sequelize";
 import BookModel from "./book.model.js";
 import User from "./user.model.js";
 import  Transaction from "./transaction.model.js";
@@ -14,7 +13,6 @@ Transaction.belongsTo(User, { foreignKey: "userId" });
 Transaction.belongsTo(Book, { foreignKey: "bookId" });
 
 Fine.belongsTo(User, { foreignKey: "userId", as: "user" });
-
 
 
 

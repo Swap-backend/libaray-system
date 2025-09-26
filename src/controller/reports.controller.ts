@@ -36,7 +36,9 @@ export const getOverdueBooks = async (_req: Request, res: Response) => {
     const overdueTransactions = await Transaction.findAll({
       where: {
         status: "borrowed",
-        returnDate: { [Op.lt]: today },
+        returnDate: {
+          [Op.lt]: today,
+        },
       },
       include: [
         {
@@ -45,7 +47,7 @@ export const getOverdueBooks = async (_req: Request, res: Response) => {
         },
         {
           model: Book,
-          attributes: ["id", "title", "author"],
+          attributes: ["id", "name", "author_name"], // Updated field names
         },
       ],
       order: [["returnDate", "ASC"]],
@@ -64,6 +66,7 @@ export const getOverdueBooks = async (_req: Request, res: Response) => {
   }
 };
 
+
 export const getFinesCollected = async (_req: Request, res: Response) => {
   try {
     const paidFines = await Fine.findAll({
@@ -71,6 +74,7 @@ export const getFinesCollected = async (_req: Request, res: Response) => {
       include: [
         {
           model: User,
+          as: "user",  // Important: Must match the alias in your association
           attributes: ["id", "userName", "email"],
         },
       ],
