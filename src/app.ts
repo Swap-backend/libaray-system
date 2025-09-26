@@ -14,10 +14,11 @@ dotenv.config();
 
 const app = express();
 const PORT = Number(process.env.PORT) || 6000;
+console.log(PORT);
 
 //  Allow frontend URL (http://localhost:3000)
 app.use(cors({
-  origin: "http://localhost:3000",
+  origin: "http://localhost:3001",
   methods: ["GET", "POST", "PUT", "DELETE"],
   credentials: true
 }));
